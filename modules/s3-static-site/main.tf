@@ -11,35 +11,36 @@ resource "aws_s3_bucket" "bucket" {
 }
 
 variable "temp" {
-  default = "./.assets-temp"
-}
-variable "deployable" {
-  default = "deployable"
+  default = ".temp"
 }
 
 resource "null_resource" "local-resources" {
   triggers = {
     versions-to-deploy = var.release-version
+    bucket = aws_s3_bucket.bucket.id
   }
 
   provisioner "local-exec" {
-    command = <<EOT
-      rm -rf ${var.temp};
-      mkdir -P ${var.temp};
-      wget https://github.com/${var.github-owner}/${var.github-repo}/releases/download/${var.release-version}/${var.deployable-name} -P ${var.temp};
-      tar -czvf ${var.temp}/${var.deployable-name} ${var.temp}/${var.deployable}
-    EOT
+    command = "rm -rf ${path.module}/${var.temp} && mkdir -p ${path.module}/${var.temp}"
+    interpreter = ["bash", "-c"]
+  }
+  provisioner "local-exec" {
+    command = "wget -q https://github.com/${var.github-owner}/${var.github-repo}/releases/download/${var.release-version}/${var.deployable-name} -P ${path.module}/${var.temp}"
+    interpreter = ["bash", "-c"]
+  }
+  provisioner "local-exec" {
+    command = "tar -xf ${path.module}/${var.temp}/${var.deployable-name} --directory ${path.module}/${var.temp}"
+    interpreter = ["bash", "-c"]
   }
 }
 
-
-
+// Todo - mime types, fix race condition with apply
 resource "aws_s3_bucket_object" "website_files" {
-  for_each   = fileset("${var.temp}/${var.deployable}", "**/*.*")
+  for_each   = fileset("${path.module}/${var.temp}/dist", "**/*.*")
   bucket     = aws_s3_bucket.bucket.bucket
-  key        = replace(each.value, "${var.temp}/${var.deployable}", "")
-  source     = "${var.temp}/${var.deployable}/${each.value}"
+  key        = replace(each.value, "${path.module}/${var.temp}/dist", "")
+  source     = "${path.module}/${var.temp}/dist/${each.value}"
   acl        = "public-read"
-  etag       = filemd5("${var.temp}/${var.deployable}/${each.value}")
+  etag       = filemd5("${path.module}/${var.temp}/dist/${each.value}")
   depends_on = [null_resource.local-resources]
 }
