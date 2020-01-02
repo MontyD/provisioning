@@ -1,0 +1,5 @@
+release-version = "2.0.6"
+github-owner = "MontyD"
+github-repo = "thewell"
+deployable-name = "dist.tar.gz"
+domain = "thewellhopton.org.uk"
