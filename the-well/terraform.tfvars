@@ -1,4 +1,4 @@
-release-version = "2.0.6"
+release-version = "2.0.7"
 github-owner = "MontyD"
 github-repo = "thewell"
 deployable-name = "dist.tar.gz"

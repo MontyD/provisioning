@@ -20,7 +20,6 @@ resource "aws_s3_bucket" "bucket" {
   }
 }
 
-// Todo - mime types, fix race condition with apply
 resource "aws_s3_bucket_object" "website_files" {
   for_each     = data.external.release-resources.result
   bucket       = aws_s3_bucket.bucket.bucket
