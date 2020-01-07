@@ -18,8 +18,9 @@ resource "aws_s3_bucket" "web-bucket" {
 }
 
 resource "aws_s3_bucket" "logs-bucket" {
-  bucket = "logs-${var.domain}"
-  acl    = "private"
+  bucket        = "logs-${var.domain}"
+  acl           = "private"
+  force_destroy = true
 
   tags = {
     Name = "Logs"
