@@ -75,7 +75,7 @@ resource "aws_cloudfront_distribution" "cdn_distribution" {
     }
   }
 
-  // aliases = ["www.${var.domain}"] TODO once we have a cert
+  aliases = ["www.${var.domain}"]
 
   restrictions {
     geo_restriction {
