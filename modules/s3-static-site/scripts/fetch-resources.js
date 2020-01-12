@@ -18,15 +18,25 @@ const runCommand = command => new Promise((resolve, reject) => {
     });
 });
 
-const mapFilesToContentType = (files, directoryPath) => {
-    return files.reduce((acc, fileName) => {
+const mapFilesToContentType = async (fileNames, directoryPath) => {
+    let files = {};
+    for (const fileName of fileNames) {
+        const filePath = path.join(directoryPath, fileName);
+        if ((await fsp.stat(filePath)).isDirectory()) {
+            files = {
+                ...files,
+                ...(await mapFilesToContentType(await fsp.readdir(filePath), filePath)),
+            };
+            continue;
+        }
+
         const contentType = contentTypes[path.extname(fileName)];
         if (!contentType) {
             throw new Error(`Unknown content type for file ${fileName}`);
         }
-        acc[path.join(directoryPath, fileName)] = contentType;
-        return acc;
-    }, {});
+        files[filePath] = contentType;
+    }
+    return files;
 };
 
 const downloadDeployable = (url, destination) => new Promise((resolve, reject) => {

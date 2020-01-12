@@ -30,6 +30,7 @@ resource "aws_s3_bucket" "logs-bucket" {
 resource "aws_s3_bucket_object" "website_files" {
   for_each     = data.external.release-resources.result
   bucket       = aws_s3_bucket.web-bucket.bucket
+  // todo - fix this so that directories get included
   key          = basename(each.key)
   source       = each.key
   acl          = "public-read"
