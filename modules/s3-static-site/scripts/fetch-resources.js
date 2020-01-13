@@ -65,12 +65,22 @@ const main = async ({ deployableName, owner, repo, version }) => {
     if (content.length === 0) {
         throw new Error(`Empty deployable response`);
     }
+
     // single directory containing files
     if (content.length === 1 && (await fsp.stat(path.join(tempDir, content[0]))).isDirectory()) {
-        return mapFilesToContentType(await fsp.readdir(path.join(tempDir, content[0])), path.join(tempDir, content[0]));
+        return {
+            ...(await mapFilesToContentType(await fsp.readdir(path.join(tempDir, content[0])), path.join(tempDir, content[0]))),
+            __tempDir: path.join(tempDir, content[0]) + path.sep,
+            __pathSep: path.sep,
+        }
     }
+
     // many files at top level directory
-    return mapFilesToContentType(content, tempDir);
+    return {
+        ...(await mapFilesToContentType(content, tempDir)),
+        __tempDir: tempDir + path.sep,
+        __pathSep: path.sep,
+    }
 }
 
 main(JSON.parse(readFileSync(0))) // read and parse args from stdin

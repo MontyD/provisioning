@@ -30,12 +30,11 @@ resource "aws_s3_bucket" "logs-bucket" {
 resource "aws_s3_bucket_object" "website_files" {
   for_each     = data.external.release-resources.result
   bucket       = aws_s3_bucket.web-bucket.bucket
-  // todo - fix this so that directories get included
-  key          = basename(each.key)
-  source       = each.key
+  key          = replace(replace(each.key, data.external.release-resources.result.__tempDir, ""), data.external.release-resources.result.__pathSep, "/")
+  source       = substr(each.key, 0, 2) == "__" ? "" : each.key
   acl          = "public-read"
-  etag         = filemd5(each.key)
-  content_type = each.value
+  etag         = substr(each.key, 0, 2) == "__" ? "" : filemd5(each.key)
+  content_type = substr(each.key, 0, 2) == "__" ? "" : each.value
 }
 
 resource "aws_acm_certificate" "certificate" {
