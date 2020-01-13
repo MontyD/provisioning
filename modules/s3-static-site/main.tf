@@ -2,6 +2,11 @@ provider "aws" {
   region = var.region
 }
 
+provider "aws" {
+  alias  = "east"
+  region = "us-east-1"
+}
+
 data "external" "release-resources" {
   program = ["node", "${path.module}/scripts/fetch-resources.js"]
   query = {
@@ -38,6 +43,7 @@ resource "aws_s3_bucket_object" "website_files" {
 }
 
 resource "aws_acm_certificate" "certificate" {
+  provider          = aws.east // required for the certificate to be picked up by cloud-front
   domain_name       = var.domain
   validation_method = "EMAIL"
   subject_alternative_names = ["www.${var.domain}"]
