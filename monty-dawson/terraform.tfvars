@@ -1,0 +1,5 @@
+release-version = "1.0.5"
+github-owner = "MontyD"
+github-repo = "MontyDawsonV2"
+deployable-name = "dist.tar.gz"
+domain = "montydawson.co.uk"
