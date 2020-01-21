@@ -19,7 +19,12 @@ data "external" "release-resources" {
 
 resource "aws_s3_bucket" "web-bucket" {
   bucket = var.domain
-  acl    = "private"
+  acl    = "public-read"
+
+  website {
+    index_document = "index.html"
+    error_document = contains(keys(data.external.release-resources.result), "error.html") ? "error.html" : "index.html"
+  }
 }
 
 resource "aws_s3_bucket" "logs-bucket" {
@@ -43,9 +48,9 @@ resource "aws_s3_bucket_object" "website_files" {
 }
 
 resource "aws_acm_certificate" "certificate" {
-  provider          = aws.east // required for the certificate to be picked up by cloud-front
-  domain_name       = var.domain
-  validation_method = "DNS"
+  provider                  = aws.east // required for the certificate to be picked up by cloud-front
+  domain_name               = var.domain
+  validation_method         = "DNS"
   subject_alternative_names = ["www.${var.domain}"]
 }
 
