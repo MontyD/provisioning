@@ -86,7 +86,7 @@ resource "aws_cloudfront_distribution" "cdn_distribution" {
     }
   }
 
-  aliases = ["www.${var.domain}"]
+  aliases = ["www.${var.domain}", var.domain]
 
   restrictions {
     geo_restriction {
