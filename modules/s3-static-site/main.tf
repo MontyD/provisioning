@@ -29,7 +29,7 @@ resource "aws_s3_bucket" "web-bucket" {
   website {
     index_document = "index.html"
     error_document = contains(keys(data.external.release-resources.result), "error.html") ? "error.html" : "index.html"
-    routing_rules = contains(keys(data.external.release-resources.result), "route-rules") ? file(data.external.release-resources.result["route-rules"]) : null
+    routing_rules = contains(values(data.external.release-resources.result), "route-rules.json") ? file(element(keys(data.external.release-resources.result), index(values(data.external.release-resources.result), "route-rules.json"))) : null
   }
 }
 
