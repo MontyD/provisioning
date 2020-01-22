@@ -17,6 +17,11 @@ data "external" "release-resources" {
   }
 }
 
+data "external" "content-types" {
+  program = ["node", "${path.module}/scripts/get-content-types.js"]
+  query = data.external.release-resources.result
+}
+
 resource "aws_s3_bucket" "web-bucket" {
   bucket = var.domain
   acl    = "public-read"
@@ -24,6 +29,7 @@ resource "aws_s3_bucket" "web-bucket" {
   website {
     index_document = "index.html"
     error_document = contains(keys(data.external.release-resources.result), "error.html") ? "error.html" : "index.html"
+    routing_rules = contains(keys(data.external.release-resources.result), "route-rules") ? file(data.external.release-resources.result["route-rules"]) : null
   }
 }
 
@@ -40,11 +46,11 @@ resource "aws_s3_bucket" "logs-bucket" {
 resource "aws_s3_bucket_object" "website_files" {
   for_each     = data.external.release-resources.result
   bucket       = aws_s3_bucket.web-bucket.bucket
-  key          = replace(replace(each.key, data.external.release-resources.result.__tempDir, ""), data.external.release-resources.result.__pathSep, "/")
-  source       = substr(each.key, 0, 2) == "__" ? "" : each.key
+  key          = each.value
+  source       = each.key
   acl          = "public-read"
-  etag         = substr(each.key, 0, 2) == "__" ? "" : filemd5(each.key)
-  content_type = substr(each.key, 0, 2) == "__" ? "" : each.value
+  etag         = filemd5(each.key)
+  content_type = data.external.content-types.result[each.value]
 }
 
 resource "aws_acm_certificate" "certificate" {

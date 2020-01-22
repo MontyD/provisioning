@@ -5,8 +5,6 @@ const crypto = require('crypto');
 const { promises: fsp, readFileSync, createWriteStream } = require('fs');
 const { exec } = require('child_process');
 
-const contentTypes = require('./content-types.json');
-
 const createHash = () => crypto.createHash('sha1').update(`${Date.now()}${Math.random()}`).digest('hex').replace(/[0-9]/g, '').substr(0, 5);
 
 const runCommand = command => new Promise((resolve, reject) => {
@@ -18,23 +16,20 @@ const runCommand = command => new Promise((resolve, reject) => {
     });
 });
 
-const mapFilesToContentType = async (fileNames, directoryPath) => {
+const mapFileNameToFilePath = async (fileNames, directoryPath, baseDirectoryPath = directoryPath) => {
     let files = {};
     for (const fileName of fileNames) {
         const filePath = path.join(directoryPath, fileName);
         if ((await fsp.stat(filePath)).isDirectory()) {
             files = {
                 ...files,
-                ...(await mapFilesToContentType(await fsp.readdir(filePath), filePath)),
+                ...(await mapFileNameToFilePath(await fsp.readdir(filePath), filePath, baseDirectoryPath)),
             };
             continue;
         }
-
-        const contentType = contentTypes[path.extname(fileName)];
-        if (!contentType) {
-            throw new Error(`Unknown content type for file ${fileName}`);
-        }
-        files[filePath] = contentType;
+        // create normalised version of the path that will be used as the bucket key, e.g. C:\\temp\\index.html becomes index.html
+        const normalisedFilePath = filePath.replace(baseDirectoryPath, '').replace(new RegExp(`\\${path.sep}`, 'g'), '/').replace(/^\//, '');
+        files[filePath] = normalisedFilePath;
     }
     return files;
 };
@@ -68,19 +63,11 @@ const main = async ({ deployableName, owner, repo, version }) => {
 
     // single directory containing files
     if (content.length === 1 && (await fsp.stat(path.join(tempDir, content[0]))).isDirectory()) {
-        return {
-            ...(await mapFilesToContentType(await fsp.readdir(path.join(tempDir, content[0])), path.join(tempDir, content[0]))),
-            __tempDir: path.join(tempDir, content[0]) + path.sep,
-            __pathSep: path.sep,
-        }
+        return mapFileNameToFilePath(await fsp.readdir(path.join(tempDir, content[0])), path.join(tempDir, content[0]));
     }
 
     // many files at top level directory
-    return {
-        ...(await mapFilesToContentType(content, tempDir)),
-        __tempDir: tempDir + path.sep,
-        __pathSep: path.sep,
-    }
+    return await mapFileNameToFilePath(content, tempDir);
 }
 
 main(JSON.parse(readFileSync(0))) // read and parse args from stdin
