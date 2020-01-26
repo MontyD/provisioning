@@ -28,7 +28,7 @@ resource "aws_s3_bucket" "web-bucket" {
 
   website {
     index_document = "index.html"
-    error_document = contains(keys(data.external.release-resources.result), "error.html") ? "error.html" : "index.html"
+    error_document = contains(values(data.external.release-resources.result), "error.html") ? "error.html" : "index.html"
     routing_rules = contains(values(data.external.release-resources.result), "route-rules.json") ? file(element(keys(data.external.release-resources.result), index(values(data.external.release-resources.result), "route-rules.json"))) : null
   }
 }
@@ -107,7 +107,7 @@ resource "aws_cloudfront_distribution" "cdn_distribution" {
 
   custom_error_response {
     error_code         = 404
-    response_code      = 200
-    response_page_path = contains(keys(data.external.release-resources.result), "error.html") ? "/error.html" : "/index.html"
+    response_code      = contains(values(data.external.release-resources.result), "error.html") ? 404 : 200
+    response_page_path = contains(values(data.external.release-resources.result), "error.html") ? "/error.html" : "/index.html"
   }
 }
