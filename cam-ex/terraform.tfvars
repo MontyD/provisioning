@@ -1,4 +1,4 @@
-release-version = "0.1.1"
+release-version = "0.1.3"
 github-owner = "MontyD"
 github-repo = "weather-app"
 deployable-name = "dist.tar.gz"
