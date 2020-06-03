@@ -14,7 +14,7 @@ variable "deployable-name" {
     type = string
     description = "The name of the deployable file"
 }
-variable "domain" {
+variable "bucket-name" {
     type = string
-    description = "The domain name that will be used"
+    description = "The name to use for the bucket"
 }

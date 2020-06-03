@@ -16,5 +16,5 @@ variable "deployable-name" {
 }
 variable "domain" {
     type = string
-    description = "TThe domain name that will be used"
+    description = "The domain name that will be used"
 }

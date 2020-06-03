@@ -6,8 +6,8 @@ terraform {
   }
 }
 
-module "s3-static-site" {
-  source          = "../modules/s3-static-site"
+module "cloudfront-site" {
+  source          = "../modules/cloudfront-site"
   region          = "eu-west-2"
   domain          = var.domain
   release-version = var.release-version

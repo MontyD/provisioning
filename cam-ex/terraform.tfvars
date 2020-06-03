@@ -1,0 +1,5 @@
+release-version = "0.1.1"
+github-owner = "MontyD"
+github-repo = "weather-app"
+deployable-name = "dist.tar.gz"
+bucket-name = "monty-dawson-weather-app"

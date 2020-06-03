@@ -16,5 +16,9 @@ variable "deployable-name" {
 }
 variable "domain" {
     type = string
-    description = "The domain name that will be used"
+    description = "TThe domain name that will be used"
+}
+variable "region" {
+  type = string
+  description = "The AWS region to use"
 }
