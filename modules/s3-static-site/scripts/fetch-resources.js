@@ -29,7 +29,7 @@ const mapFileNameToFilePath = async (fileNames, directoryPath, baseDirectoryPath
         }
         // create normalised version of the path that will be used as the bucket key, e.g. C:\\temp\\index.html becomes index.html
         const normalisedFilePath = filePath.replace(baseDirectoryPath, '').replace(new RegExp(`\\${path.sep}`, 'g'), '/').replace(/^\//, '');
-        files[filePath] = normalisedFilePath;
+        files[normalisedFilePath] = filePath;
     }
     return files;
 };
@@ -53,7 +53,7 @@ const main = async ({ deployableName, owner, repo, version }) => {
     await runCommand(`rm -rf ${tempDir} && mkdir ${tempDir}`);
     await downloadDeployable(`https://github.com/${owner}/${repo}/releases/download/${version}/${deployableName}`, targetPath);
 
-    await runCommand(`tar -xf ${targetPath} --force-local --directory  "${tempDir}"`);
+    await runCommand(`tar -xf ${targetPath} --directory  "${tempDir}"`);
     await fsp.unlink(targetPath);
 
     const content = await fsp.readdir(tempDir);

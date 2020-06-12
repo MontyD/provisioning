@@ -41,9 +41,9 @@ resource "aws_s3_bucket" "logs-bucket" {
 resource "aws_s3_bucket_object" "website_files" {
   for_each     = data.external.release-resources.result
   bucket       = aws_s3_bucket.web-bucket.bucket
-  key          = each.value
-  source       = each.key
+  key          = each.key
+  source       = each.value
   acl          = "public-read"
-  etag         = filemd5(each.key)
-  content_type = data.external.content-types.result[each.value]
+  etag         = filemd5(each.value)
+  content_type = data.external.content-types.result[each.key]
 }
